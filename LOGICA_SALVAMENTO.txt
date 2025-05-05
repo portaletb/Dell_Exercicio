@@ -1,0 +1,39 @@
+Fazer uma classe com switch em que possa ser escolhida um caso de 5 diferente;
+	Case 1
+		Jogada Original: +5 pontos 
+	Case 2		
+		Gafe (Movimento que prejudica o jogador que fez a jogada): -3 pontos
+	Case 3	
+		Posicionamento vantajoso (domina o tabuleiro melhor que o adversário): +2 pontos
+	Case 4
+		Desrespeito ao adversário (fazendo comentários inapropriados): -5 pontos
+	Case 5
+		Ataque de fúria (quando se irrita com uma boa jogada do adversário): -7 pontos 
+
+
+/*esses casos podem ser NÂO PODEM reutilizados na mesma partida 
+
+Ex: +5 pontos, -7pontos, +2pontos, +2pontos
+
+*/
+
+
+Fazer uma classe pessoa com:
+
+private:
+
+string nome;
+string nickname;
+int ranking(entre 1 e 15000);
+//talvez tenha os pontos aqui, mesmo todos começando com 70pts em cada torneio
+
+public:
+string getNome();
+string getNickname();
+int getRanking();
+//logo teria o getPontos 
+
+Fazer uma classe(provavelmente n precise ser classe) Do torneio onde: 
+1-	Se o numero de jogadores for menor (<) que 4, maior (>) que 8 ou o numero de participantes for impar (Jogadores %2 != 0) o torneio nem começa;
+2-	O jogador que ganhar a partida receberá +30 pontos e o que perder deverá ser eliminado do torneio;
+3-	Em caso de empate, ocorre uma "Blitz Match", uma rodada relampago em que um dos dois aleatoriamente recebe +2 pontos e com isso, o novo placar decide quem venceu
