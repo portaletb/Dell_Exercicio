@@ -37,3 +37,7 @@ Fazer uma classe(provavelmente n precise ser classe) Do torneio onde:
 1-	Se o numero de jogadores for menor (<) que 4, maior (>) que 8 ou o numero de participantes for impar (Jogadores %2 != 0) o torneio nem começa;
 2-	O jogador que ganhar a partida receberá +30 pontos e o que perder deverá ser eliminado do torneio;
 3-	Em caso de empate, ocorre uma "Blitz Match", uma rodada relampago em que um dos dois aleatoriamente recebe +2 pontos e com isso, o novo placar decide quem venceu
+
+
+possivel Funcionalidade extra
+o top 3 do torneio, sobem 50, 100 e 150 posições na pontuação ranking respectivamente
