@@ -27,7 +27,7 @@ int main() {
     }
 
     if(qtd <4 || qtd >8 || qtd %2 != 0){
-       cout << "O número de jogadores no torneio é inválido";
+       cout << "O número de jogadores no torneio é inválido"<<endl;
     }
     else {
 

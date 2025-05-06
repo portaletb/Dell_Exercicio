@@ -12,6 +12,7 @@ class Pessoa {
         string nickname;
         int pontuacaoRanking; //pontuação é completamente diferente de pontos, um é apenas visual enquanto o outro é sobre
         int pontos = 70;      //os pontos dentro do torneio
+        int acaoUsada[5] = {0}; 
     
     public:
         Pessoa(string n, string nick, int pontuacao)
@@ -36,11 +37,21 @@ class Pessoa {
         void atualizarPontos(int delta) {  //delta = variavel aleatória
             pontos += delta;
         }
+               
+        void registrarAcao(int acao) {
+            if (acao >= 1 && acao <= 5) {
+                acaoUsada[acao - 1]++;
+            }
+        }        
+
     };
 
     class Torneio {
         public:
+
             void jogo(Pessoa &p1, Pessoa &p2) {
+             vector<Pessoa*> vencedores;
+             
                 cout << "\n=== Jogo entre " << p1.getNickname()
                      << " e " << p2.getNickname() << " ===\n";
         
@@ -100,6 +111,8 @@ class Pessoa {
                 }
         
                 jogadorEscolhido->atualizarPontos(delta);
+                jogadorEscolhido->registrarAcao(acao); 
+
         
                 cout << jogadorEscolhido->getNickname()
                      << " agora tem " << jogadorEscolhido->getPontos() 
@@ -107,6 +120,40 @@ class Pessoa {
                 cout << "Deseja continuar o jogo? (y/n)" << endl;
                 cin >> aux;
             }
+            cout << "Escolha (1 ou 2) caso tenha ou 0 caso seja empate: ";
+
+            int escolha;
+            cin >> escolha;
+    
+            if (escolha == 1) {
+                p1.atualizarPontos(30);
+                vencedores.push_back(&p1);
+            } else if (escolha == 2) {
+                p2.atualizarPontos(30);
+                vencedores.push_back(&p2);
+            }
+            else {
+                cout << "Empate! Blitz match ativada...\n";
+                random_device rd;
+                mt19937 g(rd());
+                uniform_int_distribution<int> dist(0, 1);
+                int vencedorAleatorio = dist(g);
+    
+                Pessoa* vencedor = (vencedorAleatorio == 0) ? &p1 : &p2;
+                vencedor->atualizarPontos(2);
+                cout << "🏁 " << vencedor->getNickname() << " venceu a blitz match (+2 pontos)!\n";
+                vencedores.push_back(vencedor);
         }
-        };
+        
+               random_device rd;
+               mt19937 g(rd());
+               shuffle(vencedores.begin(), vencedores.end(), g);
+    
+               if(vencedores.size() == 1) {
+               cout << "\n🏆 VENCEDOR FINAL: " << vencedores[0]->getNickname()
+                 << " com " << vencedores[0]->getPontos() << " pontos!\n";
+                 return;
+        }
+    }
+    };
         
