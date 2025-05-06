@@ -29,6 +29,10 @@ class Pessoa {
             return pontuacaoRanking;
         }
 
+        int getPontos(){
+            return pontos;
+        }
+
         void atualizarPontos(int delta) {
             pontos += delta;
         }
@@ -41,6 +45,9 @@ class Pessoa {
                      << " e " << p2.getNickname() << " ===\n";
         
                 int escolhaJogador;
+                char aux = 'y';
+                    while (aux == 'y'){
+
                 cout << "Quem fará a jogada?\n";
                 cout << "1 - " << p1.getNickname() << "\n";
                 cout << "2 - " << p2.getNickname() << "\n";
@@ -92,11 +99,14 @@ class Pessoa {
                         return;
                 }
         
-                jogadorEscolhido->atualizarPontuacao(delta);
+                jogadorEscolhido->atualizarPontos(delta);
         
                 cout << jogadorEscolhido->getNickname()
-                     << " agora tem " << jogadorEscolhido->getPontuacaoRanking()
-                     << " pontos no ranking.\n";
+                     << " agora tem " << jogadorEscolhido->getPontos() 
+                     << " pontos.\n";
+                cout << "Deseja continuar o jogo? (y/n)" << endl;
+                cin >> aux;
             }
+        }
         };
         
