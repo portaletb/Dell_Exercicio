@@ -10,8 +10,8 @@ class Pessoa {
     private:
         string nome;
         string nickname;
-        int pontuacaoRanking;
-        int pontos = 70;
+        int pontuacaoRanking; //pontuação é completamente diferente de pontos, um é apenas visual enquanto o outro é sobre
+        int pontos = 70;      //os pontos dentro do torneio
     
     public:
         Pessoa(string n, string nick, int pontuacao)
@@ -33,7 +33,7 @@ class Pessoa {
             return pontos;
         }
 
-        void atualizarPontos(int delta) {
+        void atualizarPontos(int delta) {  //delta = variavel aleatória
             pontos += delta;
         }
     };
