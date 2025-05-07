@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
+#include <map>
 using namespace std;
 
 class Pessoa {
@@ -44,20 +45,78 @@ class Pessoa {
             }
         }        
 
-    };
+        void exibirAcoesUsadas() {
+            cout << "Ações usadas por " << nickname << ":\n";
+            cout << "1 - Jogada original: " << acaoUsada[0] << "x\n";
+            cout << "2 - Gafe: " << acaoUsada[1] << "x\n";
+            cout << "3 - Posicionamento vantajoso: " << acaoUsada[2] << "x\n";
+            cout << "4 - Desrespeito ao adversário: " << acaoUsada[3] << "x\n";
+            cout << "5 - Ataque de fúria: " << acaoUsada[4] << "x\n";
+        }
+       
+        void mostrarRankingGrafico(vector<Pessoa>& jogadores) {
+            // Ordenar por pontos (decrescente)
+            sort(jogadores.begin(), jogadores.end(), [](Pessoa& a, Pessoa& b) {
+                return a.getPontos() > b.getPontos();
+            });
+        
+            cout << "\n===== RANKING FINAL DO TORNEIO =====\n";
+            for (auto& jogador : jogadores) {
+                cout << "\n👤 " << jogador.getNickname() << " (" << jogador.getPontos() << " pts)\n";
+                cout << "   Ações usadas:\n";
+        
+                // Pegar quantas vezes cada ação foi usada
+                const char* nomesAcoes[5] = {
+                    "Jogada original     ",
+                    "Gafe                ",
+                    "Posicionamento vant.",
+                    "Desrespeito         ",
+                    "Ataque de fúria     "
+                };
+        
+                for (int i = 0; i < 5; ++i) {
+                    int vezes = jogador.getPontuacaoRanking();  // método a ser adicionado na classe
+                    cout << "   " << nomesAcoes[i] << ": ";
+                    for (int j = 0; j < vezes; ++j) cout << "#";
+                    cout << " (" << vezes << ")\n";
+                }
+            }
+        }
 
+    };
+        
     class Torneio {
+        private:
+        map<string, int> apostasFeitas;
+        map<string, int> fichasGanhas;
+        map<string, int> fichasPerdidas;
+        int fichasAtuais = 1000;  // banca inicial do sistema fictício
+        
+        
         public:
 
-            void jogo(Pessoa &p1, Pessoa &p2) {
+            Pessoa* jogo(Pessoa &p1, Pessoa &p2) {
              vector<Pessoa*> vencedores;
              
                 cout << "\n=== Jogo entre " << p1.getNickname()
                      << " e " << p2.getNickname() << " ===\n";
         
+                cout << "💰 Aposta: Em quem você deseja apostar 100 fichas?\n";
+                cout << "1 - " << p1.getNickname() << "\n";
+                cout << "2 - " << p2.getNickname() << "\n";
+                int aposta;
+                    cin >> aposta;
+
+                Pessoa* jogadorApostado = (aposta == 1) ? &p1 : &p2;
+                string nickApostado = jogadorApostado->getNickname();
+                apostasFeitas[nickApostado] += 10;
+                fichasAtuais -= 100;
+
+                
                 int escolhaJogador;
-                char aux = 'y';
-                    while (aux == 'y'){
+
+                bool aux = true;
+                    while (aux == true){
 
                 cout << "Quem fará a jogada?\n";
                 cout << "1 - " << p1.getNickname() << "\n";
@@ -73,7 +132,7 @@ class Pessoa {
                     jogadorEscolhido = &p2;
                 else {
                     cout << "Opção inválida. Ninguém jogou.\n";
-                    return;
+                    return nullptr;
                 }
         
                 cout << "\nEscolha a ação:\n";
@@ -107,53 +166,134 @@ class Pessoa {
                         break;
                     default:
                         cout << "Ação inválida.\n";
-                        return;
+                        return nullptr;
                 }
         
                 jogadorEscolhido->atualizarPontos(delta);
                 jogadorEscolhido->registrarAcao(acao); 
 
-        
+       
+
                 cout << jogadorEscolhido->getNickname()
                      << " agora tem " << jogadorEscolhido->getPontos() 
                      << " pontos.\n";
-                cout << "Deseja continuar o jogo? (y/n)" << endl;
-                cin >> aux;
+                     char n;
+                     cout << "Deseja continuar o jogo? (y/n)" << endl;
+                     cin >> n;
+                     cin.ignore(numeric_limits<streamsize>::max(), '\n');  // limpa até o '\n'
+                     
+                     if (n == 'y' || n == 'Y') {
+                         aux = true;
+                     } else {
+                         aux = false;
+                     }                
             }
-            cout << "Escolha (1 ou 2) caso tenha ou 0 caso seja empate: ";
+                cout << "Escolha (1 ou 2) caso tenha ou 0 caso seja empate: ";
 
-            int escolha;
-            cin >> escolha;
-    
-            if (escolha == 1) {
-                p1.atualizarPontos(30);
-                vencedores.push_back(&p1);
-            } else if (escolha == 2) {
-                p2.atualizarPontos(30);
-                vencedores.push_back(&p2);
+                int escolha;
+                cin >> escolha;
+                Pessoa* vencedor = nullptr;
+                if (escolha == 1) {
+                    p1.atualizarPontos(30);
+                    vencedores.push_back(&p1);
+                    vencedor = &p1;
+                } else if (escolha == 2) {
+                    p2.atualizarPontos(30);
+                    vencedores.push_back(&p2);
+                    vencedor = &p2;
+                }
+                else {
+                    cout << "Empate! Blitz match ativada...\n";
+                    random_device rd;
+                    mt19937 g(rd());
+                    uniform_int_distribution<int> dist(0, 1);
+                    int vencedorAleatorio = dist(g);
+        
+                    Pessoa* vencedor = (vencedorAleatorio == 0) ? &p1 : &p2;
+                    vencedor->atualizarPontos(2);
+                    cout << "🏁 " << vencedor->getNickname() << " venceu a blitz match (+2 pontos)!\n";
+                    vencedores.push_back(vencedor);
+                    
             }
-            else {
-                cout << "Empate! Blitz match ativada...\n";
+            
+            if (vencedor == jogadorApostado) {
+                cout << "🎉 Aposta vencida! Você ganhou 200 fichas.\n";
+                fichasGanhas[nickApostado] += 200;
+                fichasAtuais += 200;
+            } else {
+                cout << "😢 Aposta perdida. Você perdeu 100 fichas.\n";
+                fichasPerdidas[nickApostado] += 100;
+            }
+
+            return vencedor;
+
+        }
+    
+            Pessoa* executarTorneioRecursivo(vector<Pessoa*>& jogadores) {
+                if (jogadores.size() == 1) {
+                    cout << "\n🏆 VENCEDOR FINAL: " << jogadores[0]->getNickname()
+                         << " com " << jogadores[0]->getPontos() << " pontos!\n";
+                    jogadores[0]->exibirAcoesUsadas();
+                    return jogadores[0];
+
+                    cout << "\n📊 Estatísticas das Apostas Virtuais:\n";
+                    cout << "Fichas finais do sistema: " << fichasAtuais << "\n";
+    
+                    string maisApostado, maiorLucro, maiorPrejuizo;
+                    int maxApostas = 0, maxGanho = 0, maxPerda = 0;
+    
+                    for (auto& [nick, total] : apostasFeitas) {
+                    cout << "Jogador: " << nick 
+                    << " | Apostado: " << total
+                    << " | Ganho: " << fichasGanhas[nick]
+                    << " | Perdido: " << fichasPerdidas[nick] << "\n";
+             
+                    if (total > maxApostas) {
+                    maxApostas = total;
+                    maisApostado = nick;
+                    }
+                    if (fichasGanhas[nick] > maxGanho) {
+                    maxGanho = fichasGanhas[nick];
+                    maiorLucro = nick;
+                    }
+                    if (fichasPerdidas[nick] > maxPerda) {
+                    maxPerda = fichasPerdidas[nick];
+                    maiorPrejuizo = nick;
+                    }
+    }
+    
+                    cout << "\n🏅 Jogador mais apostado: " << maisApostado << endl;
+                    cout << "💰 Jogador que mais rendeu: " << maiorLucro << endl;
+                    cout << "📉 Jogador que mais causou prejuízo: " << maiorPrejuizo << endl;
+    
+
+                }
+        
+                cout << "\n--- NOVA FASE DO TORNEIO COM " << jogadores.size() << " JOGADORES ---\n";
+        
                 random_device rd;
                 mt19937 g(rd());
-                uniform_int_distribution<int> dist(0, 1);
-                int vencedorAleatorio = dist(g);
-    
-                Pessoa* vencedor = (vencedorAleatorio == 0) ? &p1 : &p2;
-                vencedor->atualizarPontos(2);
-                cout << "🏁 " << vencedor->getNickname() << " venceu a blitz match (+2 pontos)!\n";
-                vencedores.push_back(vencedor);
-        }
+                shuffle(jogadores.begin(), jogadores.end(), g);
         
-               random_device rd;
-               mt19937 g(rd());
-               shuffle(vencedores.begin(), vencedores.end(), g);
-    
-               if(vencedores.size() == 1) {
-               cout << "\n🏆 VENCEDOR FINAL: " << vencedores[0]->getNickname()
-                 << " com " << vencedores[0]->getPontos() << " pontos!\n";
-                 return;
-        }
-    }
-    };
+                vector<Pessoa*> vencedores;
         
+                for (size_t i = 0; i + 1 < jogadores.size(); i += 2) {
+                    Pessoa* vencedor = jogo(*jogadores[i], *jogadores[i + 1]);
+                    if (vencedor != nullptr)
+                        vencedores.push_back(vencedor);
+                }
+        
+                // Se número ímpar, último jogador avança
+                if (jogadores.size() % 2 != 0) {
+                    cout << jogadores.back()->getNickname()
+                         << " avança automaticamente para a próxima fase!\n";
+                    vencedores.push_back(jogadores.back());
+                }
+        
+                // chamada recursiva
+                return executarTorneioRecursivo(vencedores);
+
+             
+                }
+        };
+    

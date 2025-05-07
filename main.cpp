@@ -1,5 +1,6 @@
 #include "main.hpp"
 using namespace std;
+
 int main() {
     vector<Pessoa> jogadores;
     int qtd;
@@ -26,22 +27,23 @@ int main() {
         jogadores.emplace_back(nome, nick, pontos);
     }
 
-    if(qtd <4 || qtd >8 || qtd %2 != 0){
-       cout << "O número de jogadores no torneio é inválido"<<endl;
-    }
-    else {
+    if (qtd < 4 || qtd > 8 || qtd % 2 != 0) {
+        cout << "O número de jogadores no torneio é inválido" << endl;
+    } else {
+        // Embaralhar os jogadores
+        unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+        shuffle(jogadores.begin(), jogadores.end(), default_random_engine(seed));
 
-    // Embaralhar os jogadores
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    shuffle(jogadores.begin(), jogadores.end(), default_random_engine(seed));
+        // Criar vetor de ponteiros
+        vector<Pessoa*> jogadoresAtivos;
+        for (auto& p : jogadores) {
+            jogadoresAtivos.push_back(&p);
+        }
 
-    // Executar jogos em pares
-    Torneio t;
-    for (size_t i = 0; i + 1 < jogadores.size(); i += 2) {
-        t.jogo(jogadores[i], jogadores[i + 1]);
+        // Executar torneio recursivo
+        Torneio t;
+        t.executarTorneioRecursivo(jogadoresAtivos);
     }
-   
-}
 
     return 0;
 }
