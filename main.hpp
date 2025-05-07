@@ -83,6 +83,21 @@ class Pessoa {
             }
         }
 
+        vector<bool> acaoContabilizadaRodada = vector<bool>(5, false);
+
+        void resetarAcoesRodada() {
+             acaoContabilizadaRodada = vector<bool>(5, false);
+        }
+
+        int calcularPontosRodada() {
+         int pontos = 0;
+         if (acaoContabilizadaRodada[0]) pontos += 5;   // Jogada original
+         if (acaoContabilizadaRodada[1]) pontos -= 3;   // Gafe
+         if (acaoContabilizadaRodada[2]) pontos += 2;   // Posicionamento vantajoso
+         if (acaoContabilizadaRodada[3]) pontos -= 5;   // Desrespeito
+         if (acaoContabilizadaRodada[4]) pontos -= 7;   // Ataque de fúria
+         return pontos;
+}
     };
         
     class Torneio {
@@ -117,7 +132,6 @@ class Pessoa {
 
                 bool aux = true;
                     while (aux == true){
-
                 cout << "Quem fará a jogada?\n";
                 cout << "1 - " << p1.getNickname() << "\n";
                 cout << "2 - " << p2.getNickname() << "\n";
@@ -188,34 +202,37 @@ class Pessoa {
                          aux = false;
                      }                
             }
-                cout << "Escolha (1 ou 2) caso tenha ou 0 caso seja empate: ";
+            Pessoa* vencedor = nullptr;
 
-                int escolha;
-                cin >> escolha;
-                Pessoa* vencedor = nullptr;
-                if (escolha == 1) {
-                    p1.atualizarPontos(30);
-                    vencedores.push_back(&p1);
-                    vencedor = &p1;
-                } else if (escolha == 2) {
-                    p2.atualizarPontos(30);
-                    vencedores.push_back(&p2);
-                    vencedor = &p2;
-                }
-                else {
-                    cout << "Empate! Blitz match ativada...\n";
-                    random_device rd;
-                    mt19937 g(rd());
-                    uniform_int_distribution<int> dist(0, 1);
-                    int vencedorAleatorio = dist(g);
-        
-                    Pessoa* vencedor = (vencedorAleatorio == 0) ? &p1 : &p2;
-                    vencedor->atualizarPontos(2);
-                    cout << "🏁 " << vencedor->getNickname() << " venceu a blitz match (+2 pontos)!\n";
-                    vencedores.push_back(vencedor);
-                    
-            }
-            
+            if (p1.getPontos() > p2.getPontos()) {
+           cout << "🏆 " << p1.getNickname() << " venceu a rodada com mais pontos!\n";
+               p1.atualizarPontos(30);  // bônus pela vitória
+               vencedor = &p1;
+          } else if (p2.getPontos() > p1.getPontos()) {
+           cout << "🏆 " << p2.getNickname() << " venceu a rodada com mais pontos!\n";
+               p2.atualizarPontos(30);  // bônus pela vitória
+               vencedor = &p2;
+          } else {
+           cout << "🤝 Empate detectado! Blitz match ativada...\n";
+               random_device rd;
+               mt19937 g(rd());
+               uniform_int_distribution<int> dist(0, 1);
+              vencedor = (dist(g) == 0) ? &p1 : &p2;
+              vencedor->atualizarPontos(2);
+              cout << vencedor->getNickname() << " venceu a blitz match (+2 pontos)!\n";
+}
+                int pontosP1 = p1.calcularPontosRodada();
+                int pontosP2 = p2.calcularPontosRodada();               
+
+                p1.atualizarPontos(pontosP1);
+                p2.atualizarPontos(pontosP2);               
+
+                p1.resetarAcoesRodada();
+                p2.resetarAcoesRodada();                
+
+                cout << p1.getNickname() << " ganhou " << pontosP1 << " pontos por ações distintas.\n";
+                cout << p2.getNickname() << " ganhou " << pontosP2 << " pontos por ações distintas.\n";
+
             if (vencedor == jogadorApostado) {
                 cout << "🎉 Aposta vencida! Você ganhou 200 fichas.\n";
                 fichasGanhas[nickApostado] += 200;
@@ -277,23 +294,41 @@ class Pessoa {
         
                 vector<Pessoa*> vencedores;
         
+                vector<pair<Pessoa*, Pessoa*>> partidas;
                 for (size_t i = 0; i + 1 < jogadores.size(); i += 2) {
-                    Pessoa* vencedor = jogo(*jogadores[i], *jogadores[i + 1]);
-                    if (vencedor != nullptr)
-                        vencedores.push_back(vencedor);
-                }
-        
-                // Se número ímpar, último jogador avança
-                if (jogadores.size() % 2 != 0) {
-                    cout << jogadores.back()->getNickname()
-                         << " avança automaticamente para a próxima fase!\n";
-                    vencedores.push_back(jogadores.back());
-                }
-        
-                // chamada recursiva
-                return executarTorneioRecursivo(vencedores);
+                partidas.push_back({jogadores[i], jogadores[i + 1]});
+    }
 
-             
-                }
-        };
-    
+                while (!partidas.empty()) {
+                cout << "\n🎯 Partidas disponíveis nesta fase:\n";
+                for (size_t i = 0; i < partidas.size(); ++i) {
+                cout << i + 1 << " - " << partidas[i].first->getNickname()
+                 << " vs " << partidas[i].second->getNickname() << "\n";
+    }
+
+                int escolha;
+                 cout << "Digite o número da partida que deseja assistir (ou 0 para simular todas): ";
+                 cin >> escolha;
+
+                if (escolha == 0) {
+             // Simula todas as partidas restantes
+                for (auto& par : partidas) {
+                Pessoa* vencedor = (par.first->getPontos() >= par.second->getPontos()) ? par.first : par.second;
+                vencedor->atualizarPontos(30);
+                cout << "⚙️  Simulado: " << vencedor->getNickname() << " venceu automaticamente.\n";
+                vencedores.push_back(vencedor);
+        }
+                partidas.clear();
+    }           else if (escolha > 0 && escolha <= partidas.size()) {
+                auto par = partidas[escolha - 1];
+                Pessoa* vencedor = jogo(*par.first, *par.second);
+                 if (vencedor)
+                vencedores.push_back(vencedor);
+                partidas.erase(partidas.begin() + (escolha - 1));
+    }            else {
+                cout << "Opção inválida. Tente novamente.\n";
+    }
+}
+
+                return executarTorneioRecursivo(vencedores);}
+    };

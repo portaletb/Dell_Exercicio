@@ -11,20 +11,27 @@ int main() {
 
     for (int i = 0; i < qtd; ++i) {
         string nome, nick;
-        int pontos;
+        int ranking;
 
         cout << "\nJogador " << (i + 1) << ":\n";
         cout << "Nome completo: ";
+        cin.ignore(); 
         getline(cin, nome);
 
         cout << "Nickname: ";
-        getline(cin, nick);
-
-        cout << "Pontuação no ranking: ";
-        cin >> pontos;
-        cin.ignore();  // limpar o buffer após número
-
-        jogadores.emplace_back(nome, nick, pontos);
+        cin >> nick;
+       
+        do {
+            cout << "Pontuação de ranking (1 a 15000): ";
+            cin >> ranking;
+    
+            if (ranking < 1 || ranking > 15000) {
+                cout << " Número inválido. Digite novamente.\n";
+            }
+    
+        } while (ranking < 1 || ranking > 15000);
+    
+        jogadores.emplace_back(Pessoa(nome, nick, ranking));
     }
 
     if (qtd < 4 || qtd > 8 || qtd % 2 != 0) {
